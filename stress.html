@@ -1,0 +1,173 @@
+<!doctype html>
+<head>
+	<meta charset="utf-8">
+	<style type="text/css">
+		body {
+			background: #000;
+			color: #fff;
+			padding: 0;
+			margin: 0;
+			text-align: center;
+		}
+		.center {
+			text-align: center;
+			margin: 20px;
+		}
+		#container span {
+			display: inline-block;
+			background-color: #ccc;
+			width: 100px;
+			height: 100px;
+			margin: 5px;
+			line-height: 100px;
+			text-align: center;
+			color: #FFF;
+			border-radius: 4px;
+		}
+		#container span.in {
+			background-color: #fcc;
+		}
+		#container span.partial-above {
+			background-color: #ccf;
+		}
+		#container span.partial-below {
+			background-color: #ffc;
+		}
+		#counter {
+			position: fixed;
+			font-size: 30px;
+			top: 50%;
+			left: 50%;
+			color: black;
+			opacity: 0.8;
+			text-align: center;
+		}
+		#counter > div {
+			position: relative;
+			background-color: white;
+			padding: 30px;
+			border-radius: 30px;
+			left: -50%;
+			top: -80px;
+		}
+		.fill-with-count {
+			color: red;
+		}
+	​</style>
+</head>
+<body>
+	<h1 class="center"><font color="#00bcd4">awesomeScroll</font> Showing <span class="fill-with-count"></span> elements.</h1>
+
+	<div class="center">
+		you can change the number in url like <a style="text-decoration: underline;">stress.html<font color="#00bcd4">?20001</font></a>
+	</div>
+
+	<div id="container">
+	</div>
+
+	<div id="counter">
+		<div>
+			<div id="status">Rendering elements...</div>
+			<div id="progress_numbers"></div>
+			<progress></progress>
+		</div>
+	</div>
+
+	<a href="https://github.com/stephenkingsley/awesome-scroll">
+		<img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub">
+	</a>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+	<script src="awesomeScroll.e804e7eb.js"></script>
+	<script type="text/javascript">
+
+		var setImmediate = (function(){
+			var fnsQueue = []
+			  , hasSI = !!(window.setImmediate || window.msSetImmediate)
+			  , hasPM = window.addEventListener && window.postMessage
+
+			if ( !hasSI && hasPM  )
+			  window.addEventListener('message', function(e){
+				  if ( e.data === "sleipnirImmediate" ) if (fnsQueue.length)
+					fnsQueue.shift()() // take the first fn from the array and execute it
+			  }, false)
+
+			return window.setImmediate || window.msSetImmediate ||
+				   (function(){
+					   if ( hasPM )
+						 return function(fn){
+							 fnsQueue.push(fn)
+							 window.postMessage('sleipnirImmediate', window.location.href)
+						 }
+					   return function(fn){
+						   setTimeout(fn, 0)
+					   }
+				   }())
+		}())
+
+		var count = parseInt(window.location.search.substr(1), 10) || 10000;
+		$('.fill-with-count').html(count);
+
+		var container = document.getElementById('container');
+		var counter = $('#progress_numbers')[0]
+		var progress = $('#counter progress')[0]
+
+		var frag = document.createDocumentFragment();
+		var i = 0;
+
+		function addElements() {
+			var elements = Array.prototype.slice.apply(frag.childNodes);
+			container.appendChild( frag );
+			elements.forEach(makeWatcher);
+		}
+
+		function draw() {
+			var el;
+			while (i < count) {
+				el = document.createElement('span');
+				el.innerHTML = i += 1;
+				frag.appendChild(el);
+
+				if ((i % 423) === 0) {
+					addElements();
+					counter.innerHTML = (i)+' of '+count;
+					progress.value = i;
+					break;
+				}
+			}
+			if (i === count) {
+				addElements();
+				$(counter).remove();
+				$('#status').html('recalculating locations...');
+				progress.removeAttribute('value');
+				setImmediate(function() {
+					scrollMonitor.recalculateLocations();
+					$('#counter').remove();
+				});
+			} else {
+				setImmediate(draw);
+			}
+		}
+
+		progress.max = count;
+		draw();
+
+		function addClass() {
+			if (!this.isInViewport) {
+				return;
+			} else if (this.isFullyInViewport) {
+				this.watchItem.style.backgroundColor = '#009688';
+			} else if (this.isAboveViewport) {
+				this.watchItem.style.backgroundColor = '#64FFDA';
+			} else if (this.isBelowViewport) {
+				this.watchItem.style.backgroundColor = '#00BFA5';
+			}
+		}
+		function makeWatcher( element ) {
+			var watcher = scrollMonitor.create( element );
+			watcher.stateChange(addClass);
+			addClass.call( watcher );
+		}
+
+	</script>
+</body>
