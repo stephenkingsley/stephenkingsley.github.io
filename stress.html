@@ -78,9 +78,9 @@
 	</a>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-	<script src="awesomeScroll.e804e7eb.js"></script>
+	<script src="awesomeScroll.c8e3a870.js"></script>
 	<script type="text/javascript">
-
+	console.log(scrollMonitor);
 		var setImmediate = (function(){
 			var fnsQueue = []
 			  , hasSI = !!(window.setImmediate || window.msSetImmediate)
@@ -165,6 +165,7 @@
 		}
 		function makeWatcher( element ) {
 			var watcher = scrollMonitor.create( element );
+			console.log(watcher);
 			watcher.stateChange(addClass);
 			addClass.call( watcher );
 		}
